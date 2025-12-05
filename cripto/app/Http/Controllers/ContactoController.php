@@ -5,17 +5,21 @@ namespace App\Http\Controllers;
 use App\Models\Contacto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 
 
 class ContactoController extends Controller
 {
+    public function __construct()
+    {
+        // Require authentication for mutating actions
+        $this->middleware('auth')->only(['store', 'update', 'destroy']);
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $data  = Contacto::whith('user')->get();
+        $data  = Contacto::with(['owner', 'contactUser'])->get();
         return response()->json([
             'status'=>'ok',
             'data'=>$data
@@ -39,7 +43,7 @@ class ContactoController extends Controller
             'contacto_user_id' => 'required|integer|exists:users,id',
             'NAME' => 'required|string|max:255',
         ]);
-        $validated['user_id'] = Auth()::id();
+        $validated['user_id'] = Auth::id();
         $contacto = Contacto::create($validated);
         return response()->json([
             'status' => 'contacto creado',
@@ -52,15 +56,14 @@ class ContactoController extends Controller
      */
     public function show(String $id)
     {
-        $contacto = Contacto::whith('user_id','contacto_user_id')->findOrFail($id);
-    {
+        $contacto = Contacto::with(['owner', 'contactUser'])->findOrFail($id);
+
         return response()->json([
             'status' => 'ok',
             'message' => 'Contacto encontrado',
             'data' => $contacto
         ]);
     }
-}
 
     /**
      * Show the form for editing the specified resource.
