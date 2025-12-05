@@ -5,21 +5,33 @@ namespace App\Http\Controllers;
 use App\Models\Contacto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
 
 class ContactoController extends Controller
 {
     public function __construct()
     {
-        // Require authentication for mutating actions
-        $this->middleware('auth')->only(['store', 'update', 'destroy']);
+        // Require Sanctum token authentication for mutating actions
+        // Ensure index also requires auth so each user sees only their contacts
+        $this->middleware('auth:sanctum')->only(['index','store', 'update', 'destroy']);
     }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $data  = Contacto::with(['owner', 'contactUser'])->get();
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthenticated'], 401);
+        }
+
+        $data  = Contacto::with(['owner', 'contactUser'])
+            ->where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
         return response()->json([
             'status'=>'ok',
             'data'=>$data
@@ -39,16 +51,46 @@ class ContactoController extends Controller
      */
     public function store(Request $request)
     {
+        $userId = Auth::id();
+
+        Log::info('ContactoController@store called', ['user_id' => $userId, 'input' => $request->all()]);
+
         $validated = $request->validate([
-            'contacto_user_id' => 'required|integer|exists:users,id',
+            'contacto_user_id' => [
+                'required','integer','exists:users,id',
+                // Evita duplicados por usuario dueño (columna específica)
+                Rule::unique('crypto_contactos', 'contacto_user_id')->where(function ($query) use ($userId) {
+                    return $query->where('user_id', $userId);
+                })
+            ],
             'NAME' => 'required|string|max:255',
         ]);
-        $validated['user_id'] = Auth::id();
-        $contacto = Contacto::create($validated);
-        return response()->json([
-            'status' => 'contacto creado',
-            'data' => $contacto
-        ], 201);
+
+        // Evitar que un usuario se agregue a sí mismo
+        if ((int)$validated['contacto_user_id'] === (int)$userId) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No puedes agregarte a ti mismo como contacto.'
+            ], 422);
+        }
+        $validated['user_id'] = $userId;
+
+        try {
+            $contacto = Contacto::create($validated);
+            Log::info('Contacto creado', ['contacto_id' => $contacto->{$contacto->getKeyName()} ?? null]);
+            return response()->json([
+                'status' => 'contacto creado',
+                'data' => $contacto
+            ], 201);
+        } catch (QueryException $e) {
+            // Manejar errores de base de datos (p.ej. constraint violations)
+            Log::error('Error al crear contacto', ['error' => $e->getMessage()]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error al crear contacto',
+                'detail' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

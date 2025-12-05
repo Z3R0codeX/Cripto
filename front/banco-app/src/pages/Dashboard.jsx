@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useBank } from '../context/BankContext';
 import { Link, Outlet } from 'react-router-dom';
 

@@ -1,17 +1,39 @@
 // src/pages/Home.jsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useBank } from '../context/BankContext';
 import { Link } from 'react-router-dom';
 
 export default function Home() {
-    const { user } = useBank();
+    const { user, transactions, loadTransactions, contacts, loadContacts } = useBank();
 
-    // Simulación de transacciones (Más adelante las traeremos de la API real)
-    const recentTransactions = [
-        { id: 1, type: 'Enviado', name: 'Netflix', amount: -15.00, date: 'Hoy' },
-        { id: 2, type: 'Recibido', name: 'Nómina', amount: 2500.00, date: 'Ayer' },
-        { id: 3, type: 'Enviado', name: 'Carlos Ruiz', amount: -50.00, date: '02 Dic' },
-    ];
+    // Load real transactions from API on mount
+    useEffect(() => { loadContacts(); loadTransactions(); }, []);
+
+    const recentTransactions = (transactions || []).slice(0, 5).map(tx => {
+        const raw = Number(tx.MONTO || tx.monto || 0);
+        let tipo = (tx.TIPO || tx.tipo || '').toLowerCase();
+        let type = tipo.includes('out') ? 'Enviado' : (tipo.includes('in') ? 'Recibido' : 'Otro');
+        // Determine signed amount: negative for out, positive for in
+        const amount = tipo.includes('out') ? -Math.abs(raw) : Math.abs(raw);
+        // Prefer to display the contact name when we can match it
+        let name = tx.DESCRIPCION || (tx.wallet && tx.wallet.ID_WALLET) || 'Movimiento';
+        try {
+            // Try to find a contact whose name or account number matches the description or wallet info
+            const match = (contacts || []).find(c => {
+                if (!c) return false;
+                const desc = (tx.DESCRIPCION || '').toString();
+                if (!desc) return false;
+                if ((c.name || '') === desc) return true;
+                if ((c.account_number || '') === desc) return true;
+                // Also allow matching by email contained in wallet or description
+                if (tx.wallet && c.account_number && tx.wallet.ID_WALLET && tx.wallet.ID_WALLET.toString() === c.account_number) return true;
+                return false;
+            });
+            if (match) name = match.name;
+        } catch (e) { /* ignore */ }
+        const date = tx.created_at ? new Date(tx.created_at).toLocaleDateString() : '';
+        return { id: tx.ID_TRANSACCION || tx.id, type, name, amount, date };
+    });
 
     return (
         <div>
@@ -68,9 +90,9 @@ export default function Home() {
                                     <td style={{ 
                                         textAlign: 'right', 
                                         fontWeight: 'bold',
-                                        color: t.amount > 0 ? '#2ecc71' : '#000' 
+                                        color: t.amount > 0 ? '#2ecc71' : '#e74c3c' 
                                     }}>
-                                        {t.amount > 0 ? '+' : ''}{t.amount}
+                                        {t.amount > 0 ? '+' : ''}{Math.abs(t.amount).toFixed(2)}
                                     </td>
                                 </tr>
                             ))}

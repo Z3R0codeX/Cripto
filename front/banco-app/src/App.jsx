@@ -1,7 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { BankProvider, useBank } from './context/BankContext';
-import Login from './pages/Login';      
+import Login from './pages/Login';     
+import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Contacts from './pages/Contacts';
 import Transfer from './pages/Transfers';
@@ -21,6 +22,7 @@ function App() {
             <BrowserRouter>
                 <Routes>
                     <Route path="/" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
                     <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>}>
                         <Route index element={<Home />} />
                         <Route path="contacts" element={<Contacts />} />

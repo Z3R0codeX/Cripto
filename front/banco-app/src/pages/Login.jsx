@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useBank } from '../context/BankContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -24,6 +24,7 @@ export default function Login() {
                     <input type="password" placeholder="Contraseña" value={password} onChange={e => setPassword(e.target.value)} required />
                     <button type="submit" className="btn-primary">Entrar</button>
                 </form>
+                <p style={{ marginTop: 12 }}>¿No tienes cuenta? <Link to="/register">Regístrate</Link></p>
             </div>
         </div>
     );

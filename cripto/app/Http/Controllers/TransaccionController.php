@@ -17,10 +17,24 @@ class TransaccionController extends Controller
      */
     public function index()
     {
-        $data = Transaccion::whith('user')->get();
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthenticated'], 401);
+        }
+
+        // Obtener wallets del usuario
+        $walletIds = Wallet::where('user_id', $user->id)->pluck('ID_WALLET')->toArray();
+
+        // Obtener transacciones relacionadas con esas wallets
+        $data = Transaccion::whereIn('ID_WALLET', $walletIds)
+            ->orderBy('created_at', 'desc')
+            ->with(['wallet'])
+            ->limit(50)
+            ->get();
+
         return response()->json([
-            'status'=>'ok',
-            'data'=>$data
+            'status' => 'ok',
+            'data' => $data
         ]);
     }
 
