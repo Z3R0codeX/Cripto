@@ -1,0 +1,278 @@
+:root {
+  /* --- TU PALETA DE COLORES --- */
+  --col-deep-purple: #320363;
+  --col-vibrant-purple: #420977;
+  --col-hot-pink: #D82776;
+  --col-magenta: #BD0E5D;
+  --col-neon-yellow: #FAFD01;
+  
+  /* Blancos */
+  --col-white-1: #FEFFFA; 
+  --col-white-2: #FAFAFA;
+  --col-white-3: #FCFCF7;
+
+  /* Texto */
+  --text-main: #000000; 
+  --text-light: #FCFCF7;
+  --text-muted: #666;
+}
+
+/* --- RESET & FULL SCREEN --- */
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  background-color: var(--col-white-2);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- PANTALLA DE LOGIN (Full Screen) --- */
+.center-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, var(--col-deep-purple) 0%, var(--col-vibrant-purple) 100%);
+  margin: 0;
+}
+
+/* Para que el login no se estire excesivamente, usamos esta clase específica */
+.login-card {
+  width: 100%;
+  max-width: 450px; /* Límite solo para el login */
+}
+
+/* --- DASHBOARD LAYOUT (Full Screen) --- */
+.dashboard-layout {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* --- SIDEBAR --- */
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background-color: var(--col-deep-purple);
+  color: var(--text-light);
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.sidebar h3 {
+  color: var(--col-neon-yellow);
+  margin-top: 0;
+  font-size: 1.5rem;
+}
+
+.sidebar a {
+  color: var(--col-white-3);
+  text-decoration: none;
+  padding: 12px 15px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  display: block;
+}
+
+.sidebar a:hover {
+  background-color: var(--col-vibrant-purple);
+  color: var(--col-neon-yellow);
+  transform: translateX(5px);
+}
+
+.user-info {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(250, 253, 1, 0.2);
+}
+
+.user-info .balance {
+  font-size: 1.8em;
+  font-weight: bold;
+  color: var(--col-neon-yellow);
+  margin: 5px 0 0 0;
+}
+
+/* --- CONTENIDO PRINCIPAL --- */
+.content {
+  flex: 1; /* Ocupa todo el espacio restante */
+  padding: 30px;
+  overflow-y: auto;
+  background-color: var(--col-white-2);
+  display: flex;       /* Flexbox para manejar el layout interno */
+  flex-direction: column; 
+}
+
+/* --- GRIDS Y CARDS --- */
+
+/* Contenedor Grid para cuando quieras dashboard estilo widgets */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Columnas automáticas */
+  gap: 20px;
+  width: 100%;
+}
+
+/* Estilo base de Tarjeta (Ahora ocupa el 100% por defecto) */
+.card {
+  background: var(--col-white-1);
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.02);
+  width: 100%; /* IMPORTANTE: Ocupar todo el ancho disponible */
+  margin-bottom: 20px;
+}
+
+/* Clase auxiliar para formularios que no quieres que sean gigantes (ej. Transferir) */
+.form-container {
+  max-width: 600px; /* Límite razonable para inputs */
+  margin: 0 auto;   /* Centrado si sobra espacio */
+}
+
+/* --- INPUTS & BOTONES --- */
+input, select {
+  width: 100%;
+  padding: 14px;
+  margin: 10px 0 20px 0;
+  border: 2px solid #eee;
+  border-radius: 8px;
+  background-color: var(--col-white-3);
+  font-size: 16px;
+  color: var(--text-main);
+  box-sizing: border-box;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--col-vibrant-purple);
+}
+
+button {
+  padding: 14px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: var(--col-hot-pink);
+  color: white;
+  width: 100%;
+}
+
+.btn-primary:hover {
+  background-color: var(--col-magenta);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(216, 39, 118, 0.3);
+}
+
+.btn-logout {
+  margin-top: auto;
+  background-color: rgba(255,255,255,0.1);
+  color: var(--col-white-3);
+}
+
+.btn-logout:hover {
+  background-color: var(--col-magenta);
+}
+
+/* Tablas Full Width */
+.contacts-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+}
+.contacts-table tr {
+  background-color: var(--col-white-1);
+}
+.contacts-table td, .contacts-table th {
+  padding: 15px;
+  text-align: left;
+}
+.contacts-table th { color: var(--text-muted); }
+
+.danger-zone {
+  margin-top: 50px;
+  padding-top: 20px;
+  border-top: 2px dashed #ccc;
+}
+/* --- ESTILOS ESPECÍFICOS DEL HOME --- */
+
+/* Tarjeta de Saldo */
+.balance-card .amount {
+  font-size: 3rem; /* Texto gigante */
+  font-weight: 800;
+  color: var(--col-vibrant-purple);
+  margin: 10px 0;
+}
+
+.balance-card .account-number {
+  color: var(--text-muted);
+  font-family: monospace;
+  font-size: 1.1rem;
+}
+
+/* Acciones Rápidas */
+.actions-grid {
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.action-btn {
+  flex: 1; /* Todos del mismo ancho */
+  background-color: var(--col-white-3);
+  border: 2px solid #eee;
+  border-radius: 12px;
+  padding: 15px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--text-main);
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-btn .icon {
+  font-size: 1.5rem;
+}
+
+.action-btn:hover {
+  border-color: var(--col-hot-pink);
+  background-color: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+/* Ajuste para que la tabla ocupe todo el ancho en la tarjeta */
+.history-card {
+  min-height: 300px; /* Altura mínima para que no se vea vacía */
+}

@@ -14,20 +14,20 @@ class UserSeeder extends Seeder
     public function run(): void
     {
       
-        User::create([
-            'name' => 'Admin Usuario',
-            'email' => 'admin@crypto.com',
-            'password' => Hash::make('password123'), // Contraseña encriptada
-            'FECHA_NACIMIENTO' => '1990-01-15',
-            'PHOTO' => 'https://example.com/photos/admin.jpg',
-        ]);
+        // 1. El Admin
+    User::create([
+        'name' => 'Admin',
+        'email' => 'admin@banco.com', // <--- Este lo busca WalletSeeder y ContactoSeeder
+        'password' => bcrypt('1234'),
+        // ... otros datos
+    ]);
 
-        User::create([
-            'name' => 'Demo Usuario',
-            'email' => 'demo@crypto.com',
-            'password' => Hash::make('password123'),
-            'FECHA_NACIMIENTO' => '1995-05-20',
-            'PHOTO' => 'https://example.com/photos/demo.jpg',
-        ]);
+    // 2. El Usuario Demo (Para poder agregarlo como contacto)
+    User::create([
+        'name' => 'Usuario Demo',
+        'email' => 'demo@crypto.com', // <--- Este lo busca ContactoSeeder
+        'password' => bcrypt('1234'),
+        // ... otros datos
+    ]);
     }
 }

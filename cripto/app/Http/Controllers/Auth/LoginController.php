@@ -5,41 +5,53 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User; // Asegúrate de importar el modelo User
 
 class LoginController extends Controller
 {
-    public function showLoginForm()
-    {
-        return view('auth.login'); // Create this blade file later
-    }
+    // ELIMINAMOS showLoginForm() PORQUE REACT YA TIENE SU PROPIO FORMULARIO
 
     public function login(Request $request)
     {
-        $request->validate([
+        // 1. Validar los datos que vienen de React
+        $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        $credentials = $request->only('email', 'password');
-
+        // 2. Intentar loguear
         if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
+            $user = Auth::user();
+            
+            // 3. ¡IMPORTANTE! Generar el Token (Laravel Sanctum)
+            // Esto es la llave que React guardará
+            $token = $user->createToken('auth_token')->plainTextToken;
 
-            return redirect()->intended('/dashboard'); // Redirect after login
+            // 4. Devolver JSON en lugar de redirect
+            return response()->json([
+                'message' => 'Login exitoso',
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'user' => $user
+            ], 200);
         }
 
-        return back()->withErrors([
-            'email' => 'Incorrect email or password.',
-        ]);
+        // 5. Si falla, devolver error JSON
+        return response()->json([
+            'message' => 'Las credenciales no coinciden con nuestros registros.'
+        ], 401); // 401 significa No Autorizado
     }
 
     public function logout(Request $request)
     {
-        Auth::logout();
+        // Borrar el token actual (Cerrar sesión en API)
+        // Usamos el helper de Sanctum
+        if ($request->user()) {
+            $request->user()->currentAccessToken()->delete();
+        }
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect('/login');
+        return response()->json([
+            'message' => 'Sesión cerrada correctamente'
+        ]);
     }
 }

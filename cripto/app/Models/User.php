@@ -1,16 +1,21 @@
 <?php
 
 namespace App\Models;
-use Tymon\JWTAuth\Contracts\JWTSubject;
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+// 1. QUITAMOS las líneas de JWTSubject y Tymon
+// use Tymon\JWTAuth\Contracts\JWTSubject; <--- ELIMINAR
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens; // <--- 2. AGREGAMOS SANCTUM
 
-class User extends Authenticatable implements JWTSubject
+// 3. QUITAMOS "implements JWTSubject"
+class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    // 4. AGREGAMOS "HasApiTokens" AQUÍ DENTRO
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -21,8 +26,10 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
-        'FECHA_NACIMIENTO',
-        'PHOTO',
+        'FECHA_NACIMIENTO', // Mantengo tus campos personalizados
+        'PHOTO',            // Mantengo tus campos personalizados
+        'balance',          // Agregué este porque lo usamos en la BD
+        'account_number',   // Agregué este porque lo usamos en la BD
     ];
 
     /**
@@ -47,30 +54,19 @@ class User extends Authenticatable implements JWTSubject
             'password' => 'hashed',
         ];
     }
+
+    // --- RELACIONES (Las mantenemos igual) ---
+
     public function wallets()
     {
-        // La clave foránea en 'crypto_wallets' es 'user_id'
-        // La clave local en 'users' es 'id'
         return $this->hasMany(Wallet::class, 'user_id', 'id');
     }
 
     public function contactos()
     {
-        // La clave foránea en 'crypto_contactos' es 'user_id'
         return $this->hasMany(Contacto::class, 'user_id', 'id');
     }
-    public function getJWTIdentifier()
-    {
-        return $this->getKey();
-    }
 
-    /**
-     * Return a key value array, containing any custom claims to be added to the JWT.
-     *
-     * @return array
-     */
-    public function getJWTCustomClaims()
-    {
-        return [];
-    }
+    // 5. ELIMINAMOS los métodos getJWTIdentifier() y getJWTCustomClaims()
+    // Ya no son necesarios con Sanctum.
 }
